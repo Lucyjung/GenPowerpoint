@@ -128,7 +128,9 @@ namespace Report1
                         }
                         iRow++;
                     }
+                    System.Threading.Thread.Sleep(1000);
                     workbook.Close(true);
+                    System.Threading.Thread.Sleep(1000);
                     shape.Chart.Refresh();
                 }
             }

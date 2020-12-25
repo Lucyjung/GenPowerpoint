@@ -31,38 +31,51 @@ namespace Report1
         private async Task StartGenReport()
         {
             Status.Text = "Running";
+            int retry = 0;
             await Task.Run(async () =>
             {
-                try
+                for (retry = 0; retry <= Config.retries; retry++)
                 {
-                    var dts = ExcelData.readData(textBox1.Text);
-                    Powerpoint.initialReport(@textBox2.Text);
-                    int numSlide = 1;
-                    int i = 1;
-                    foreach (DataTable dt in dts)
+                    try
                     {
-                        string processName = "";
-                        string year = DateTime.Now.ToString("yyyy");
-                        if (i % 2 == 1)
+                        var dts = ExcelData.readData(textBox1.Text);
+                        Powerpoint.initialReport(@textBox2.Text);
+                        int numSlide = 1;
+                        int i = 1;
+                        foreach (DataTable dt in dts)
                         {
-                            processName = dt.TableName;
-                            string period = "Month : " + monthCalendar1.SelectionRange.Start.ToString("MMMM yyyy");
-                            Powerpoint.genReport(processName, period, year, dt, numSlide);
+                            string processName = "";
+                            string year = DateTime.Now.ToString("yyyy");
+                            if (i % 2 == 1)
+                            {
+                                processName = dt.TableName;
+                                string period = "Month : " + monthCalendar1.SelectionRange.Start.ToString("MMMM yyyy");
+                                Powerpoint.genReport(processName, period, year, dt, numSlide);
+                            }
+                            else
+                            {
+                                Powerpoint.genReport(processName, "", year, dt, numSlide, true);
+                                numSlide++;
+                            }
+                            System.Threading.Thread.Sleep(1000);
+                            i++;
+                        }
+                        Powerpoint.CloseReport(@textBox2.Text, numSlide);
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (retry > Config.retries)
+                        {
+                            MessageBox.Show(ex.ToString());
                         }
                         else
                         {
-                            Powerpoint.genReport(processName, "", year, dt, numSlide, true);
-                            numSlide++;
+                            continue;
                         }
-                        i++;
                     }
-                    Powerpoint.CloseReport(@textBox2.Text, numSlide);
-                    
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString());
-                }
+                
             });
             Status.Text = "Done";
         }
