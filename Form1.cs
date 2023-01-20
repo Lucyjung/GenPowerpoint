@@ -42,11 +42,12 @@ namespace Report1
                         Powerpoint.initialReport(@textBox2.Text);
                         int numSlide = 1;
                         int i = 1;
+                        int chartIdx;
                         foreach (DataTable dt in dts)
                         {
                             string processName = "";
                             string year = DateTime.Now.ToString("yyyy");
-                            if (i % 2 == 1)
+                            if (i % Config.numberOfCharts == 1)
                             {
                                 processName = dt.TableName;
                                 string period = "Month : " + monthCalendar1.SelectionRange.Start.ToString("MMMM yyyy");
@@ -54,8 +55,20 @@ namespace Report1
                             }
                             else
                             {
-                                Powerpoint.genReport(processName, "", year, dt, numSlide, true);
-                                numSlide++;
+                                if (i % Config.numberOfCharts == 0)
+                                {
+                                    chartIdx = Config.numberOfCharts - 1;
+                                    
+                                } else
+                                {
+                                    chartIdx = (i % Config.numberOfCharts) - 1;
+                                }
+                                Powerpoint.genReport(processName, "", year, dt, numSlide, true, chartIdx);
+                                if (i % Config.numberOfCharts == 0)
+                                {
+                                    numSlide++;
+                                }
+                                
                             }
                             System.Threading.Thread.Sleep(1000);
                             i++;
